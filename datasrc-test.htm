@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>LazyPic-JS : Test Page </title>
+
+	<script src='https://code.jquery.com/jquery-2.1.3.js' ></script>
+	<script>
+		$(function() {
+			//alert("page load");
+		
+			$("img").each(function(index, e) {
+				var src = $(e).attr('src')
+				var datasrc = $(e).data('src');
+				
+				console.log(e.outerHTML);
+				console.log("src: " + src);
+				console.log("data-src: " + datasrc);
+				
+				if (src === undefined && datasrc != undefined) {
+					e.src = datasrc;
+					console.log("src = " + datasrc);
+				}	
+			});
+		});
+		
+	</script>
+	
+	<style>
+		img {
+			max-height:10em;
+		}
+	</style>
+
+</head>
+	<div>
+		This page tests the core functionality of LazyPic-JS
+	</div>
+	<div>
+		<p>Local Images</p>
+		<img data-src='images/meandpup.jpg' />
+		<img data-src='images/wizard.jpg' />
+		<img data-src='images/lobothead.jpg' />
+		<img data-src='images/walter-bishop.jpg' />
+	</div>
+	<div>
+		<p>World Wide Images</p>
+		<img data-src='http://upload.wikimedia.org/wikipedia/commons/e/e3/Louis_Armstrong_NYWTS.jpg'/>
+		<img data-src='http://upload.wikimedia.org/wikipedia/commons/c/c3/Mindi_Abair_-_Jazz_Alley_-_Seattle_-_2011.jpg'/>
+		<img data-src='http://pixabay.com/get/b44b9f8c450075525b36/1424406527/jazz-161024_1280.png?direct'/>
+	</div>
+</html>
