@@ -9,27 +9,42 @@
 			//alert("page load");
 		
 			$("img").each(function(index, e) {
-				$(e).bind({
-					load : function() {
-						console.log("LOADED \n" + e.src); 
-					} ,
-					error : function() {
-						console.log("ERROR \n" + e.src);
-					}
-				});
 				
-				var src = $(e).attr('src')
-				var datasrc = $(e).data('src');
-				
+				// Diagnostic info 
 				console.log(e.outerHTML);
-				console.log("src: " + src);
-				console.log("data-src: " + datasrc);
 				
-				if (src === undefined && datasrc != undefined) {
-					e.src = datasrc;
-					console.log("src = " + datasrc);
-				}	
+				/** Trigger image load : Queueified. */
+				function triggerImageLoad(e, next) {
+					// Attach queue hook before triggering image, so it doesn't miss.
+					$(e).bind({
+						load : function() {
+							console.log("LOADED \n" + e.src);
+							next();
+						} ,
+						error : function() {
+							console.log("ERROR \n" + e.src);
+							next();
+						}
+					});
+				
+					var datasrc = $(e).data('src');
+					
+					if (e.src == "" && datasrc != undefined) {
+						//set new property
+						//remove meta-data copy, to filter untriggered elements.
+						$(e).attr('src',datasrc)
+						    .attr('data-src', null)
+					};
+				}
+				
+				$(document.body).queue("lazypic", function(next) {
+					triggerImageLoad(e, next); 
+				})
+				;
+
 			});
+			
+			$(document.body).dequeue("lazypic");
 		});
 		
 	</script>
