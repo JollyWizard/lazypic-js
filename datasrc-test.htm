@@ -9,6 +9,15 @@
 			//alert("page load");
 		
 			$("img").each(function(index, e) {
+				$(e).bind({
+					load : function() {
+						console.log("LOADED \n" + e.src); 
+					} ,
+					error : function() {
+						console.log("ERROR \n" + e.src);
+					}
+				});
+				
 				var src = $(e).attr('src')
 				var datasrc = $(e).data('src');
 				
@@ -46,6 +55,12 @@
 		<p>World Wide Images</p>
 		<img data-src='http://upload.wikimedia.org/wikipedia/commons/e/e3/Louis_Armstrong_NYWTS.jpg'/>
 		<img data-src='http://upload.wikimedia.org/wikipedia/commons/c/c3/Mindi_Abair_-_Jazz_Alley_-_Seattle_-_2011.jpg'/>
-		<img data-src='http://pixabay.com/get/b44b9f8c450075525b36/1424406527/jazz-161024_1280.png?direct'/>
+		<img data-src='http://www.jazzfro.com/wp-content/uploads/2012/08/miles-davis.gif' />
+	</div>
+	<div>
+		<p>Invalid Images</p>
+		<img data-src='non-existent.jpg' />
+		<img data-src='not-even-real.png' />
+		<img data-src='datasrc-test.htm'/>
 	</div>
 </html>
