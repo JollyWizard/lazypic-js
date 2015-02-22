@@ -2,7 +2,7 @@
 
 /**
 	This function will return a lazypic state object 
-	wrapping the target element.
+	wrapping the target element in API functionality 
 */
 function imgLoadState(e) {
 	var state = {
@@ -15,7 +15,6 @@ function imgLoadState(e) {
 		trigger : function() {
 			activateDataSrc(e);
 		}
-		
 	};
 	return state;
 }
@@ -163,9 +162,9 @@ function imgLoadPromise(e) {
 */
 function activateDataSrc(e) {
 	var datasrc = $(e).data('src');
-	if($(e).attr('src')=="" && datasrc != null) {
+	if(imgLoadChecks(e).isReady()) {
 		// act on expected state
-		$(e).attr(src, datasrc)
+		$(e).attr('src', datasrc)
 			.attr('data-src',null);	
 	} else {	
 		// ensure queue proceeds on ignored elements.

@@ -9,17 +9,17 @@ QUnit.test("JQuery active in tests", function(assert) {
 
 //
 
-function firstImage() {
-	var img = $('img')[0]
+function targetImage() {
+	var img = $('.target')[0]
 	return img;
 }
 
-function firstState() {
-	return imgLoadState(firstImage());
+function targetState() {
+	return imgLoadState(targetImage());
 }
 
 function controlImage() {
-	return $('.normal img')[0];
+	return $('.control')[0];
 }
 
 function controlState() {
@@ -28,7 +28,7 @@ function controlState() {
 
 QUnit.test("Lazypic state object : detect state", function(assert) {
 	var control = controlState();
-	var target = firstState();
+	var target = targetState();
 	
 	assert.ok(control, "Control Image State Acquired");
 	assert.ok(target, "Target Image State Acquired");
@@ -39,5 +39,16 @@ QUnit.test("Lazypic state object : detect state", function(assert) {
 	assert.ok(target.checks.isReady(), "target.isReady()");
 	assert.ok(!control.checks.isReady(), "!control.isReady()");
 	
-	target.trigger();
+	$(".invalid img").each(function(index, e) {
+		assert.equal(false, imgLoadState(e).checks.isLoaded(), "!invalid-"+index + ".loaded")
+	})
+});
+
+QUnit.test("Lazypic state object : trigger", function(assert) {
+	var control = controlState()
+	var target = targetState()
+		
+	target.trigger()
+	assert.ok(target.checks.isLoaded(), "target.trigger() -> target.isLoaded()")
+	assert.ok(!target.checks.isReady(), "target.trigger() -> !target.isReady()")
 });
