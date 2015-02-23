@@ -33,7 +33,7 @@ They are certainly steps in the right direction, regarding performance and effor
 
 **LazyPic** approaches the impact of unpredictable image loading speed by managing the order in which the images are loaded from the browser side.  
 
-JavaScript already has the facilities to trigger an image load problematically, and to respond to success and error cases.  HTML5 allows us to safely store meta-data in the HTML.  Using these facilities, we store the URL in the page, but 'hide' it, until it is ready to be loaded. 
+JavaScript already has the facilities to trigger an image load programatically, and to respond to success and error cases.  HTML5 allows us to safely store meta-data in the HTML.  Using these facilities, we store the URL in the page, but 'hide' it, until it is ready to be loaded. 
 
 * Image locations are stored as HTML5 friendly *data-src* attributes.  When it is time to load an image, the url is copied to the *src* tag, triggering the browser to load the image.  
 
@@ -87,7 +87,7 @@ Tests are located under `/tests/`
 Test Notes:
 
 * Currently, tests are powered by QUnit, using remote resources.
-* Currently, 
+* Currently, tests wait for the proper number of event triggers to finish.  The order of events, and relation to callback execution, must be checked manually.  This will probably be rectified with a more intelligent approach later.  Right now, the order of execution can be visually verified in the test assertions.
 
 - - -
 
@@ -134,3 +134,5 @@ Upcoming API features:
 ## Examples
 
 Examples will be forthcoming when the API is more coherent.
+
+The test files provides the most coherent examples so far.
