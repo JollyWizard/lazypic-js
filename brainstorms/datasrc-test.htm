@@ -16,7 +16,7 @@
 				/** Trigger image load : Queueified. */
 				function triggerImageLoad(e, next) {
 					// Attach queue hook before triggering image, so it doesn't miss.
-					$(e).bind({
+					$(e).one({
 						load : function() {
 							console.log("LOADED \n" + e.src);
 							next();
@@ -31,7 +31,7 @@
 					
 					if (e.src == "" && datasrc != undefined) {
 						//set new property
-						//remove meta-data copy, to filter untriggered elements.
+						//remove meta-data copy
 						$(e).attr('src',datasrc)
 						    .attr('data-src', null)
 					};
