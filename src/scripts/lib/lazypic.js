@@ -68,21 +68,27 @@ function imgLoadListeners(e) {
 		},
 		install : function() {
 			$(e)
-			.bind("img-load-always", function() {
-				$(this).dequeue("img-load-always")
-			})
-			.bind("img-load-done", function() {
-				$(this).dequeue("img-load-done")
-			})
-			.bind("img-load-fail", function() {
-				$(this).dequeue("img-load-fail")
-			})
-			.bind("img-load-start", function() {
-				$(this).dequeue("img-load-start")
-			})
-			.bind("img-load-skip", function() {
-				$(this).dequeue("img-load-skip")
-			})
+			.bind({
+				"img-load-always" : function() {
+					$(this).dequeue("img-load-always")
+				},
+				
+				"img-load-done"	: function() {
+					$(this).dequeue("img-load-done")
+				},
+				
+				"img-load-fail" : function() {
+					$(this).dequeue("img-load-fail")
+				},
+				
+				"img-load-start" : function() {
+					$(this).dequeue("img-load-start")
+				},
+				
+				"img-load-skip" : function() {
+					$(this).dequeue("img-load-skip")
+				}
+			});
 			
 			$(e).data('img-load-installed', true);
 		},
@@ -101,7 +107,6 @@ function imgLoadListeners(e) {
 function imgLoadTriggers(e) {
 	
 	function start	()	{$(e).trigger('img-load-start'  );}	
-
 	function always	()	{$(e).trigger('img-load-always' );}
 	function skip	()	{$(e).trigger('img-load-skip'	);always();}
 	function done	() 	{$(e).trigger('img-load-done'	);always();}
@@ -120,10 +125,11 @@ function imgLoadTriggers(e) {
 	return buildTrigger();
 }
 
-/** Get a promise-like interface that indexes event's to the . 
+/** 
 
-Note this promise will not work if imgLoadPromise
-has not been called on the element.
+Get a promise-like interface that caches callbacks 
+intended to be triggered by the related event cycle
+of the image loading process. 
 */
 function imgLoadPromise(e) {	
 	imgLoadListeners(e).ensure();
