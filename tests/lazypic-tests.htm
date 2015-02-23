@@ -31,6 +31,11 @@
 				right:2.5%;
 			}
 			
+			.invalid img {
+				padding: 1em;
+				background: gray;
+			}
+			
 		</style>
     </head>
     <body>
@@ -39,7 +44,7 @@
 				This page tests the core functionality of LazyPic-JS
 			</div>
 			<div class='state-test' > 
-				<p>State Test</p>
+				<h3>State Test</h3>
 				<img class='control' src='images/meandpup.jpg' 
 					style='border:thin solid black;'
 					alt="normal image"
@@ -50,24 +55,28 @@
 				/>
 			</div>
 			<div class='local'>
-				<p>Local Images</p>
+				<h3>Local Images</h3>
 				<img data-src='images/meandpup.jpg' />
 				<img data-src='images/wizard.jpg' />
 				<img data-src='images/lobothead.jpg' />
 				<img data-src='images/walter-bishop.jpg' />
 			</div>
 			<div class='remote'>
-				<p>World Wide Images</p>
+				<h3>World Wide Images</h3>
 				<img data-src='http://upload.wikimedia.org/wikipedia/commons/e/e3/Louis_Armstrong_NYWTS.jpg'/>
 				<img data-src='http://upload.wikimedia.org/wikipedia/commons/c/c3/Mindi_Abair_-_Jazz_Alley_-_Seattle_-_2011.jpg'/>
 				<img data-src='http://www.jazzfro.com/wp-content/uploads/2012/08/miles-davis.gif' />
 			</div>
 			<div class='invalid'>
-				<p>Invalid Images</p>
-				<img data-src='non-existent.jpg'  id='bad-url-jpg' />
-				<img data-src='not-even-real.png' id='bad-url-png' />
-				<img data-src='datasrc-test.htm'  id="invalid-resource"/>
-				<img id="no-img-src"/>
+				<h3>Invalid Images</h3>
+				<p> None of these images are loadable.  <br/>
+					Invalid source: blue.  <br/>
+					Failed data request: red.<br/>
+				</p>
+				<img data-src='non-existent.jpg'  id='bad-url-jpg' alt="invalid jpeg"/>
+				<img data-src='not-even-real.png' id='bad-url-png' alt="invalid png" />
+				<img id="no-img-src" alt="no src data"/>
+				<img data-src='datasrc-test.htm'  id="invalid-resource" alt="invalid image type" />
 			</div>
 		</div>
 		

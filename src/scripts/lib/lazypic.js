@@ -9,16 +9,32 @@ function imgLoadState(e) {
 		/** The element the data targets */
 		element : e,
 		
+		/** Utility check methods, wrapped around the element.	*/
 		checks : imgLoadChecks(e),
 		
 		/** Execute a data-src image load.	*/
 		trigger : function() {
-			activateDataSrc(e);
-		}
+			activateDataSrc(e)
+		},
+		
+		/** Add the image to the queue */
+		queue : function() {
+			imgLoadQueue(e)
+			return state.promise
+		},
+		
+		/** Gets the promise regarding the image load event */
+		promise : imgLoadPromise(e)
 	};
 	return state;
 }
 
+/**
+	This function constructs an interface to perform state checks on the target element.
+	It is intended to be shared by end users (state-object::checks) and the 
+	internal utility functions (API).
+	
+*/
 function imgLoadChecks(e) {
 	var checks = {
 		/** true if the src attribute exists and is not empty */
@@ -45,107 +61,96 @@ function imgLoadChecks(e) {
 	return checks;
 }
 
-
-/**
-A queue needs to continue when the image loads or fails.
-It isn't a normal jquery promise, so we can't use always().
-
-This function provides a quick wrapper to proceed the queue.
-
-TODO extend this to execute queues that provide
-	 promise functionality on the image element 
-	 before continuing the queue.
-*/
-function attachImageQueueHooks(e) {
-	var triggers = imgLoadPromiseTriggers(e);
-	imgLoadPromise(e).always(function() {imgLoadNext()});
-	
-	$(e).one({
-		load : triggers.success ,
-		error : triggers.error ,
-		skip : triggers.always
-	});
-}
-
-/**
-Ensures that there are event listeners installed that convert events 
-into queue actions.  
-
-Returns an object which can be used to trigger those events,
-and in turn, activate the promise features.
----
-We want diagnostic events to propagate like DOM events,
-so that the process can be easily extended, 
-but we also want to trigger the dedicated event function queue 
-that drives the promise backend. This function links them together. 
-
-The relative order of execution regarding queued events and listeners,
-depends on the point at which this function is called.
-
-TODO: add an uninstall process, so the trigger can be reordered.
-*/
-function imgLoadPromiseTriggers(e) {
-	
-	/* The listeners convert bubble events into queue actions
-	*/
-	function ensureListeners() {
-		//Detect if image has triggers installed
-		var triggers = $(e).data('img-load-installed')
-		
-		//if no triggers, install
-		if (!triggers) {
+function imgLoadListeners(e) {
+	var listeners = {
+		isInstalled : function() {
+			return $(e).data('img-load-listeners') == true
+		},
+		install : function() {
 			$(e)
 			.bind("img-load-always", function() {
 				$(this).dequeue("img-load-always")
 			})
-			.bind("img-load-success", function() {
-				$(this).dequeue("img-load-success")
+			.bind("img-load-done", function() {
+				$(this).dequeue("img-load-done")
 			})
-			.bind("img-load-error", function() {
-				$(this).dequeue("img-load-error")
-			});
+			.bind("img-load-fail", function() {
+				$(this).dequeue("img-load-fail")
+			})
+			.bind("img-load-start", function() {
+				$(this).dequeue("img-load-start")
+			})
+			.bind("img-load-skip", function() {
+				$(this).dequeue("img-load-skip")
+			})
 			
 			$(e).data('img-load-installed', true);
-		}	
-	}
-	
-	/* The triggers initiate the bubble events in the appropriate sequence.
-	*/
-	function buildTrigger() {
-		function always	() {$(e).trigger('img-load-always' );imgLoadNext();}
-		function success() {$(e).trigger('img-load-success');always();}
-		function error	() {$(e).trigger('img-load-error'  );always();}
-		return {
-			always	: always,
-			success	: success,
-			error	: error
+		},
+		
+		ensure : function() {
+			if (!listeners.isInstalled())
+				listeners.install()
 		}
 	}
+	return listeners
+}
+
+/**
+  Returns a set of triggers that execute the queue trigger events.
+*/
+function imgLoadTriggers(e) {
 	
-	ensureListeners();
+	function start	()	{$(e).trigger('img-load-start'  );}	
+
+	function always	()	{$(e).trigger('img-load-always' );}
+	function skip	()	{$(e).trigger('img-load-skip'	);always();}
+	function done	() 	{$(e).trigger('img-load-done'	);always();}
+	function fail	()	{$(e).trigger('img-load-fail'	);always();}
+	
+	function buildTrigger() {
+		return {
+			always	: always,
+			done	: done,
+			fail	: fail,
+			start	: start,
+			skip	: skip
+		}
+	}
+
 	return buildTrigger();
 }
 
-/** Get a promise that responds to imgLoad events. 
+/** Get a promise-like interface that indexes event's to the . 
 
-Note this promise will not work if imgLoadPromiseTriggers 
+Note this promise will not work if imgLoadPromise
 has not been called on the element.
 */
 function imgLoadPromise(e) {	
-	return {
+	imgLoadListeners(e).ensure();
+	var promise = {
 		always : function(callback) {
 			$(e).queue("img-load-always",callback)
+			return promise;
 		},
-		success : function(callback) {
-			$(e).queue("img-load-success", callback)
+		done : function(callback) {
+			$(e).queue("img-load-done", callback)
+			return promise;
 		},
-		error : function(callback) {
-			$(e).queue("img-load-success",callback)
+		fail : function(callback) {
+			$(e).queue("img-load-fail",callback)
+			return promise;
+		},
+		start : function(callback) {
+			$(e).queue("img-load-start", callback)
+			return promise;
+		},
+		skip  : function(callback) {
+			$(e).queue("img-load-skip", callback)
+			return promise;
 		}
-	};
+	}
+	return promise
 }
-
-
 
 /**
 	Triggers the loading of the image.
@@ -163,14 +168,36 @@ function imgLoadPromise(e) {
 function activateDataSrc(e) {
 	var datasrc = $(e).data('src');
 	if(imgLoadChecks(e).isReady()) {
-		// act on expected state
+		$(e).trigger('img-load-start');
+	
 		$(e).attr('src', datasrc)
 			.attr('data-src',null);	
 	} else {	
-		// ensure queue proceeds on ignored elements.
-		// TODO add descriptive data here, so that clients can digest the cause.
-		$(e).trigger('skip')
+		// right now this is hooked on next
+		// b/c duplicate events would be forwarded.
+		// if skip were used.
+		imgLoadTriggers(e).skip()
 	}
+}
+
+/**
+A queue needs to continue when the image loads or fails.
+It isn't a normal jquery promise, so we can't use always().
+
+This function provides a quick wrapper to proceed the queue.
+
+TODO extend this to execute queues that provide
+	 promise functionality on the image element 
+	 before continuing the queue.
+*/
+function attachImageQueueHooks(e) {
+	var triggers = imgLoadTriggers(e);
+	
+	$(e).one({
+		load : triggers.done ,
+		error : triggers.fail,
+		start : triggers.start
+	});
 }
 
 
@@ -185,9 +212,9 @@ function imgLoadQueue(e) {
 		function() {
 			attachImageQueueHooks(e);
 			activateDataSrc(e);
-			$(e).trigger("img-load-queued");
 		}
 	)
+	$(e).trigger("img-load-queued");
 }
 
 /** Adds every img to the page for processing. */
